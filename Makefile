@@ -1,7 +1,8 @@
 KAFKA_VERSION ?= 1.0.0
 KAFKA_PROFILE = kafka-${KAFKA_VERSION}
 export JAVA_TOOL_OPTIONS = -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn
-LADDERS_IMAGE = $(shell aws sts get-caller-identity | jq -r '.Account').dkr.ecr.us-east-1.amazonaws.com/maxwell:1.33.1-ladders
+GIT_REF = $(shell git describe --always --dirty --abbrev=11)
+LADDERS_IMAGE = $(shell aws sts get-caller-identity | jq -r '.Account').dkr.ecr.us-east-1.amazonaws.com/maxwell:${GIT_REF}
 
 all: compile
 
