@@ -548,7 +548,7 @@ public class BinlogConnectorReplicator extends RunLoopProcess implements Replica
 						// We don't need to process them, just ignore
 					} else if (upperCaseSql.startsWith("DROP TEMPORARY TABLE")) {
 						// Ignore temporary table drop statements inside transactions
-					} else if (sql.startsWith("# Dummy event replacing event type 160")) {
+					} else if (sql.startsWith("# Dummy event replacing")) {
 						// Ignore ANNOTATE_ROWS_EVENT replaced with this dummy event due to MariaDb backward compatibility features
 						// see https://jira.mariadb.org/browse/MDEV-225
 					} else {
