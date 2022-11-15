@@ -72,6 +72,23 @@ public class Schema {
 		this.dbMap.remove(getNormalizedDbName(d.getName()));
 	}
 
+	public static boolean charsetEquals(String thisCharset, String thatCharset) {
+		if ( thisCharset == null || thatCharset == null ) {
+			return thisCharset == thatCharset;
+		}
+
+		thisCharset = thisCharset.toLowerCase();
+		thatCharset = thatCharset.toLowerCase();
+
+		if ( thisCharset.equals("utf8mb3") )
+			thisCharset = "utf8";
+
+		if ( thatCharset.equals("utf8mb3") )
+			thatCharset = "utf8";
+
+		return thisCharset.equals(thatCharset);
+	}
+
 	private void diffDBList(List<String> diff, Schema a, Schema b, String nameA, String nameB, boolean recurse) {
 		for ( Database d : a.dbMap.values() ) {
 			Database matchingDB = b.findDatabase(d.getName());
@@ -104,8 +121,8 @@ public class Schema {
 		return sensitivity;
 	};
 
-	public List<Pair<ColumnDef, ColumnDef>> matchColumns(Schema thatSchema) {
-		ArrayList<Pair<ColumnDef, ColumnDef>> list = new ArrayList<>();
+	public List<Pair<FullColumnDef, FullColumnDef>> matchColumns(Schema thatSchema) {
+		ArrayList<Pair<FullColumnDef, FullColumnDef>> list = new ArrayList<>();
 
 		for ( Database thisDatabase : this.getDatabases() ) {
 			Database thatDatabase = thatSchema.findDatabase(thisDatabase.getName());
@@ -122,10 +139,37 @@ public class Schema {
 				for ( ColumnDef thisColumn : thisTable.getColumnList() ) {
 					ColumnDef thatColumn = thatTable.findColumn(thisColumn.getName());
 					if ( thatColumn != null )
-						list.add(Pair.of(thisColumn, thatColumn));
+						list.add(Pair.of(
+								new FullColumnDef(thisDatabase, thisTable, thisColumn),
+								new FullColumnDef(thatDatabase, thatTable, thatColumn)
+						));
 				}
 			}
 		}
 		return list;
+	}
+
+	public static class FullColumnDef {
+		private final Database db;
+		private final Table table;
+		private final ColumnDef columnDef;
+
+		public FullColumnDef(Database db, Table table, ColumnDef columnDef) {
+			this.db = db;
+			this.table = table;
+			this.columnDef = columnDef;
+		}
+
+		public Database getDb() {
+			return db;
+		}
+
+		public Table getTable() {
+			return table;
+		}
+
+		public ColumnDef getColumnDef() {
+			return columnDef;
+		}
 	}
 }

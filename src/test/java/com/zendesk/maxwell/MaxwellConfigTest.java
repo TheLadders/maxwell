@@ -39,7 +39,7 @@ public class MaxwellConfigTest
 		assertNotNull(config.producerFactory);
 		assertTrue(config.producerFactory instanceof TestProducerFactory);
 	}
-	
+
 	@Test(expected = OptionException.class)
 	public void testCustomProperties() {
 		// custom properties are not supported on the command line just like 'kafka.*' properties
@@ -127,6 +127,18 @@ public class MaxwellConfigTest
 		config = new MaxwellConfig(new String[] { "--env_config=MAXWELL_JSON", "--config=" + configPath });
 		// foo in env_config overwrites bar in producer-factory-config.properties"
 		assertEquals("foo", config.customProducerProperties.getProperty("foo"));
+	}
+
+	@Test
+	public void testPubsubConfigNonDefault() {
+		config = new MaxwellConfig(new String[] { "--pubsub_rpc_timeout_multiplier=1.5" });
+		assertEquals(config.pubsubRpcTimeoutMultiplier, 1.5f, 0.0f);
+	}
+
+	@Test
+	public void testPubsubConfigDefault() {
+		config = new MaxwellConfig();
+		assertEquals(config.pubsubRpcTimeoutMultiplier, 1.0f, 0.0f);
 	}
 
 

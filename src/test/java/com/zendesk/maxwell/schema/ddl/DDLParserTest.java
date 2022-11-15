@@ -253,7 +253,14 @@ public class DDLParserTest {
 			"CREATE TABLE testTable19 ( pid BIGINT NOT NULL DEFAULT(1) )",
 			"CREATE TABLE encRTYPE ( i int ) ENCRYPTION='Y'",
 			"CREATE TABLE testfoo ( i int ) START TRANSACTION",
-
+			"ALTER TABLE c add column i int visible",
+			"ALTER TABLE c add column i int invisible",
+			"ALTER TABLE c alter column i set visible",
+			"ALTER TABLE broker.table ADD PARTITION IF NOT EXISTS (partition p20210912 VALUES LESS THAN (738411))", // some mariada-fu
+			"ALTER TABLE t1 DROP PARTITION IF EXISTS p3", // some mariada-fu
+			"ALTER TABLE t1 DROP CONSTRAINT ck",
+			"ALTER TABLE t1 DROP CHECK ck",
+			"create table test ( i float default -1. )"
 		};
 
 		for ( String s : testSQL ) {
@@ -289,8 +296,13 @@ public class DDLParserTest {
 			"SET ROLE 'role1', 'role2'",
 			"SET DEFAULT ROLE administrator, developer TO 'joe'@'10.0.0.1'",
 			"DROP ROLE 'role1'",
+			"CREATE /*M! OR REPLACE */ ROLE 'role1'",
 			"#comment\ndrop procedure if exists `foo`",
-			"/* some \n mulitline\n comment */ drop procedure if exists foo"
+			"/* some \n mulitline\n comment */ drop procedure if exists foo",
+			"SET STATEMENT max_statement_time = 60 FOR flush table",
+			"SET STATEMENT max=1, min_var=3,v=9 FOR FLUSH",
+			"SET STATEMENT max='1', min=RRRR,v=9 FOR FLUSH",
+			"SET statement max=\"1\", min='3',v=RRR, long_long_ago=4 FOR FLUSH",
 		};
 
 		for ( String s : testSQL ) {
@@ -393,7 +405,8 @@ public class DDLParserTest {
 				+ ") "
 			  	+ "ENGINE=innodb "
 				+ "CHARACTER SET='latin1' "
-			  	+ "ROW_FORMAT=FIXED"
+			  	+ "ROW_FORMAT=FIXED "
+				+ "COMPRESSION='lz4'"
 		);
 		assertThat(c, not(nullValue()));
 	}
@@ -593,5 +606,17 @@ public class DDLParserTest {
 			}
 		}
 		System.out.println(nFixed + " fixed, " + nErr + " remain.");
+	}
+
+	@Test
+	public void testPolardbXCreateIndexSQL(){
+
+		List<SchemaChange> changes = parse(
+				"# POLARX_ORIGIN_SQL=CREATE INDEX device_id_idx ON event_tracking_info_extra (event, create_time)\n" +
+				"# POLARX_TSO=698905756181096044815201227773638819850000000000000000\n" +
+				"CREATE INDEX device_id_idx ON event_tracking_info_extra (event, create_time)");
+
+		assertThat(changes,is(nullValue()));
+
 	}
 }

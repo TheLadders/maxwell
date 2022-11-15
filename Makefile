@@ -28,3 +28,7 @@ kafka-%:
 ladders:
 	docker build --tag $(LADDERS_IMAGE) .
 	docker push $(LADDERS_IMAGE)
+
+FORCE:
+docs: FORCE
+	mvn javadoc:javadoc

@@ -37,8 +37,8 @@ convert_to_character_set: CONVERT TO charset_token charset_name collation?;
 rename_column: RENAME COLUMN name TO name;
 
 alter_partition_specification:
-      ADD PARTITION skip_parens
-    | DROP PARTITION partition_names
+      ADD PARTITION if_not_exists? skip_parens
+    | DROP PARTITION if_exists? partition_names
     | TRUNCATE PARTITION partition_names
     | DISCARD PARTITION partition_names TABLESPACE
     | IMPORT PARTITION partition_names TABLESPACE
@@ -57,7 +57,7 @@ alter_partition_specification:
 ignored_alter_specifications:
     ADD index_definition
     | ALTER INDEX name (VISIBLE | INVISIBLE)
-    | ALTER COLUMN? name ((SET DEFAULT literal) | (DROP DEFAULT))
+    | ALTER COLUMN? name ((SET DEFAULT literal) | (DROP DEFAULT) | (SET (VISIBLE | INVISIBLE)))
     | DROP INDEX index_name
     | DISABLE KEYS
     | ENABLE KEYS
@@ -68,6 +68,8 @@ ignored_alter_specifications:
     | ALGORITHM '='? algorithm_type
     | LOCK '='? lock_type
     | RENAME (INDEX|KEY) name TO name
+    | DROP CHECK name
+    | DROP CONSTRAINT name
     ;
   algorithm_type: DEFAULT | INPLACE | COPY | INSTANT;
   lock_type: DEFAULT | NONE | SHARED | EXCLUSIVE;
